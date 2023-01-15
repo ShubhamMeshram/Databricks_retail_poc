@@ -132,12 +132,6 @@ CREATE DATABASE IF NOT EXISTS gold_db_retail;
 
 -- COMMAND ----------
 
-select* from (
-select * from bronze_db_retail.sales_orders);
---select distinct unit from silver_db_retail.suppliers order by 1;
-
--- COMMAND ----------
-
 -- MAGIC %md
 -- MAGIC 
 -- MAGIC  
@@ -146,6 +140,46 @@ select * from bronze_db_retail.sales_orders);
 -- COMMAND ----------
 
 -- creating silver layer PART 2
+
+--6
+-- create or replace table silver_db_retail.promotions as
+-- select 
+-- promotion_id,  promotion_type, dollar_discount, 
+-- cast (percent_discount as double), qualifying_products, units_required, free_product_ids, length, 
+-- cast (valid_from as DATE),
+-- cast (valid_to as DATE)
+-- from bronze_db_retail.promotions;
+-- select * from silver_db_retail.promotions;
+
+--7
+-- create or replace table silver_db_retail.purchase_orders as
+-- select 
+-- EAN13 ,EAN5 ,PO, 
+-- cast(from_unixtime(datetime) as timestamp) as datetime,price, product_name, product_unit, purchaser, 
+--  cast (quantity as double),supplier 
+
+-- from bronze_db_retail.purchase_orders;
+-- select * from silver_db_retail.purchase_orders;
+
+
+
+
+-- -- 8 
+-- create or replace table silver_db_retail.sales_orders as
+-- select 
+-- clicked_items,
+-- cast (customer_id as bigint),customer_name,
+-- cast (number_of_line_items as int),
+-- cast(from_unixtime(order_datetime) as timestamp) as order_datetime,order_number,
+-- inline(ordered_products), promo_info
+-- from bronze_db_retail.sales_orders;
+-- select * from silver_db_retail.sales_orders;
+
+
+-- 9 (needs more work)
+-- create or replace table silver_db_retail.sales_orders as
+-- select * from bronze_db_retail.sales_stream;
+
 
 --10
 -- create or replace table silver_db_retail.suppliers as
@@ -160,86 +194,10 @@ select * from bronze_db_retail.sales_orders);
 -- from bronze_db_retail.suppliers;
 -- select * from silver_db_retail.suppliers;
 
-
--- 9 to do
-
--- -- 8 
--- create or replace table silver_db_retail.sales_orders as
--- select 
--- clicked_items,
--- cast (customer_id as bigint),customer_name,
--- cast (number_of_line_items as int),
--- cast(from_unixtime(order_datetime) as timestamp) as order_datetime,order_number,
--- inline(ordered_products), promo_info
--- from bronze_db_retail.sales_orders;
--- select * from silver_db_retail.sales_orders;
-
-
---7
--- create or replace table silver_db_retail.purchase_orders as
--- select 
--- EAN13 ,EAN5 ,PO, 
--- cast(from_unixtime(datetime) as timestamp) as datetime,price, product_name, product_unit, purchaser, 
---  cast (quantity as double),supplier 
-
--- from bronze_db_retail.purchase_orders;
--- select * from silver_db_retail.purchase_orders;
-
-
---6
--- create or replace table silver_db_retail.promotions as
--- select 
--- promotion_id,  promotion_type, dollar_discount, 
--- cast (percent_discount as double), qualifying_products, units_required, free_product_ids, length, 
--- cast (valid_from as DATE),
--- cast (valid_to as DATE)
--- from bronze_db_retail.promotions;
--- select * from silver_db_retail.promotions;
-
 -- COMMAND ----------
 
 --select expl as cs from(
 --select * from bronze_db_retail.suppliers;
 --select * from bronze_db_retail.purchase_orders;-- where EAN13=2198122550193;
 --DESCRIBE EXTENDED silver_db_retail.sales_orders;
-DESCRIBE EXTENDED silver_db_retail.sales_orders;
-
--- COMMAND ----------
-
-DESCRIBE EXTENDED bronze_db_retail.sales_orders;
-
--- COMMAND ----------
-
--- MAGIC %python
--- MAGIC # dbutils.fs.head("dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/loyalty_segments/loyalty_segment.csv")
--- MAGIC p="/dbfs/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/sales_stream/sales_stream.json/"
--- MAGIC # f = open(p, "r")
--- MAGIC # print(f)
--- MAGIC 
--- MAGIC with  open(p, "r") as f_read:
--- MAGIC   for line in f_read:
--- MAGIC     print(line)
--- MAGIC spark_p="dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/sales_stream/"
--- MAGIC # df = spark.read.option("header","true").option("delimiter",";").json(spark_p)
--- MAGIC # display(df)
--- MAGIC # print(df.dtypes)
-
--- COMMAND ----------
-
--- MAGIC %md
--- MAGIC 
--- MAGIC  
--- MAGIC Run the following cell to delete the tables and files associated with this lesson.
-
--- COMMAND ----------
-
--- MAGIC %python
--- MAGIC DA.cleanup()
-
--- COMMAND ----------
-
--- MAGIC %md-sandbox
--- MAGIC &copy; 2022 Databricks, Inc. All rights reserved.<br/>
--- MAGIC Apache, Apache Spark, Spark and the Spark logo are trademarks of the <a href="https://www.apache.org/">Apache Software Foundation</a>.<br/>
--- MAGIC <br/>
--- MAGIC <a href="https://databricks.com/privacy-policy">Privacy Policy</a> | <a href="https://databricks.com/terms-of-use">Terms of Use</a> | <a href="https://help.databricks.com/">Support</a>
+DESCRIBE EXTENDED bronze_db_retail.sales_stream;
