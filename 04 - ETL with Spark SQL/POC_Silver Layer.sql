@@ -43,148 +43,166 @@
 
 -- COMMAND ----------
 
+-- All tables in bronze layer
+
+-- bronze_db_retail.active_promotions
+-- bronze_db_retail.company_employees
+-- bronze_db_retail.customers
+-- bronze_db_retail.loyalty_segments
+-- bronze_db_retail.products
+-- bronze_db_retail.promotions
+-- bronze_db_retail.purchase_orders
+-- bronze_db_retail.sales_orders
+-- bronze_db_retail.sales_stream
+-- bronze_db_retail.suppliers
+
+-- COMMAND ----------
+
+-- creating silver layer PART 1
+
+
+--1
+-- create or replace table silver_db_retail.active_promotions as
+-- select 
+-- cast (promo_customer as long), promo_item,  
+-- cast (promo_disc as int), 
+-- promo_id,
+-- cast(from_unixtime(promo_datetime) as timestamp) as promo_datetime, 
+-- promo_qty,
+-- cumsum,
+-- cast(from_unixtime(promo_began) as timestamp) as promo_began,
+-- units_required,
+-- cast (eligible as int),
+-- cast (deadline as DATE)
+-- from bronze_db_retail.active_promotions;
+-- select * from silver_db_retail.active_promotions;
+
+
+--2
+-- create or replace table silver_db_retail.company_employees as
+-- select 
+-- cast (employee_id as bigint), employee_name, department, region, 
+-- cast (employee_key as bigint), 
+-- cast (active_record as int), 
+-- cast (active_record_start as DATE),
+-- cast (active_record_end as DATE)
+-- from bronze_db_retail.company_employees;
+-- select * from silver_db_retail.company_employees;
+
+
+--3
+-- create or replace table silver_db_retail.customers as
+-- select 
+-- cast (customer_id as bigint), 
+-- cast (tax_id as double), tax_code,customer_name,state,city,unit,region,district,
+-- cast (postcode as double), street, number,
+-- cast (lon as double), 
+-- cast (lat as double),ship_to_address,
+-- cast(from_unixtime(valid_from) as timestamp) as valid_from,
+-- cast(from_unixtime(valid_to) as timestamp) as valid_to,
+-- cast (units_purchased as double),
+-- cast (loyalty_segment as int) 
+-- from bronze_db_retail.customers;
+-- select * from silver_db_retail.customers;
+
+--4
+-- create or replace table silver_db_retail.loyalty_segments as
+-- select 
+-- cast (loyalty_segment_id as int),  loyalty_segment_description,
+-- cast (unit_threshold as int), 
+-- cast (valid_from as DATE),
+-- cast (valid_to as DATE)
+-- from bronze_db_retail.loyalty_segments;
+-- select * from silver_db_retail.loyalty_segments;
+
+--5
+-- create or replace table silver_db_retail.products as
+-- select product_id,product_category, product_name, 
+-- cast (sales_price as double),
+-- cast (EAN13 as bigint), 
+-- cast (EAN5 as bigint),product_unit
+-- from bronze_db_retail.products;
+-- select * from silver_db_retail.products;
+
+-- COMMAND ----------
+
 CREATE DATABASE IF NOT EXISTS bronze_db_retail;
 CREATE DATABASE IF NOT EXISTS silver_db_retail;
 CREATE DATABASE IF NOT EXISTS gold_db_retail;
 
 -- COMMAND ----------
 
---show databases;
-describe database bronze_db_retail;
-
--- COMMAND ----------
-
--- MAGIC %python
--- MAGIC #View list of datasets 
--- MAGIC 
--- MAGIC 
--- MAGIC dataset_path = "dbfs:/databricks-datasets/retail-org/sales_stream"
--- MAGIC print(dataset_path)
--- MAGIC 
--- MAGIC files = dbutils.fs.ls(dataset_path)
--- MAGIC display(files)
+select* from (
+select * from bronze_db_retail.sales_orders);
+--select distinct unit from silver_db_retail.suppliers order by 1;
 
 -- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC 
 -- MAGIC  
--- MAGIC ## Creating all bronze layer tables
+-- MAGIC ## Creating all Silver layer tables
 
 -- COMMAND ----------
 
---all bronze schema table creation statements are defined here: PART 1
---1
--- CREATE OR REPLACE TABLE bronze_db_retail.active_promotions AS SELECT * FROM parquet.`dbfs:/databricks-datasets/retail-org/active_promotions/active_promotions.parquet`;
+-- creating silver layer PART 2
 
---2
--- drop table if exists bronze_db_retail.company_employees;
--- drop view if exists company_employees;
--- CREATE OR REPLACE TEMP VIEW company_employees
--- USING CSV
--- OPTIONS (
---   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/company_employees/company_employees.csv",
---   header  "true");
--- --LOCATION 
--- CREATE TABLE bronze_db_retail.company_employees AS
---   SELECT * FROM company_employees;
-
---3
--- drop table bronze_db_retail.customers;
--- CREATE table bronze_db_retail.customers
--- USING CSV
--- OPTIONS (
---   header = "true")
--- LOCATION "dbfs:/databricks-datasets/retail-org/customers/customers.csv"
+--10
+-- create or replace table silver_db_retail.suppliers as
+-- select 
+-- cast (SUPPLIER_ID as bigint),
+-- cast (TAX_ID as bigint),supplier_name,state,city,
+-- cast (postcode as double),street,
+-- cast (number as int),
+-- cast (unit as int),region,district,
+-- cast (lon as double),
+-- cast (lat as double),items_provided
+-- from bronze_db_retail.suppliers;
+-- select * from silver_db_retail.suppliers;
 
 
---4 (where schema cannot be infered, create view and then a table from view)
--- drop table if exists bronze_db_retail.loyalty_segments;
--- drop view if exists loyalty_segments;
--- CREATE OR REPLACE TEMP VIEW loyalty_segments
--- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
--- USING CSV
--- OPTIONS (
---   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/loyalty_segments/loyalty_segment.csv",
---   header "true"
---   );
--- CREATE TABLE bronze_db_retail.loyalty_segments AS
---   SELECT * FROM loyalty_segments;
+-- 9 to do
 
--- COMMAND ----------
+-- -- 8 
+-- create or replace table silver_db_retail.sales_orders as
+-- select 
+-- clicked_items,
+-- cast (customer_id as bigint),customer_name,
+-- cast (number_of_line_items as int),
+-- cast(from_unixtime(order_datetime) as timestamp) as order_datetime,order_number,
+-- inline(ordered_products), promo_info
+-- from bronze_db_retail.sales_orders;
+-- select * from silver_db_retail.sales_orders;
 
---all bronze schema table creation statements are defined here: PART 2
-
---5 (where schema cannot be infered, create view and then a table from view)
--- drop table if exists bronze_db_retail.products;
--- drop view if exists products;
--- CREATE OR REPLACE TEMP VIEW products
--- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
--- USING CSV
--- OPTIONS (
---   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/products/products.csv",
---   header "true",
---   delimiter ";"
---   );
--- CREATE TABLE bronze_db_retail.products AS
---   SELECT * FROM products;
-  
-  
---5 (where schema cannot be infered, create view and then a table from view)
--- drop table if exists bronze_db_retail.promotions;
--- drop view if exists promotions;
--- CREATE OR REPLACE TEMP VIEW promotions
--- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
--- USING CSV
--- OPTIONS (
---   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/promotions/promotions.csv",
---   header "true"
---   --delimiter ";"
---   );
--- CREATE TABLE bronze_db_retail.promotions AS
---   SELECT * FROM promotions;
-
---6
--- drop table if exists bronze_db_retail.purchase_orders;
--- CREATE TABLE bronze_db_retail.purchase_orders
--- USING xml
--- OPTIONS (path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/purchase_orders/purchase_orders.xml", rowTag "purchase_item", inferSchema "true")
 
 --7
--- drop table if exists bronze_db_retail.sales_orders;
--- CREATE TABLE bronze_db_retail.sales_orders as
--- select * from json.`dbfs:/databricks-datasets/retail-org/sales_orders/`;
+-- create or replace table silver_db_retail.purchase_orders as
+-- select 
+-- EAN13 ,EAN5 ,PO, 
+-- cast(from_unixtime(datetime) as timestamp) as datetime,price, product_name, product_unit, purchaser, 
+--  cast (quantity as double),supplier 
+
+-- from bronze_db_retail.purchase_orders;
+-- select * from silver_db_retail.purchase_orders;
 
 
---8
--- drop table if exists bronze_db_retail.sales_stream;
--- CREATE TABLE bronze_db_retail.sales_stream as
--- select * from json.`dbfs:/databricks-datasets/retail-org/sales_stream/sales_stream.json`;
-
---9
--- drop table if exists bronze_db_retail.suppliers;
--- drop view if exists suppliers;
--- CREATE OR REPLACE TEMP VIEW suppliers
--- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
--- USING CSV
--- OPTIONS (
---   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/suppliers/suppliers.csv",
---   header "true"
---   --delimiter ";"
---   );
--- CREATE TABLE bronze_db_retail.suppliers AS
---   SELECT * FROM suppliers;
-
--- COMMAND ----------
-
-
+--6
+-- create or replace table silver_db_retail.promotions as
+-- select 
+-- promotion_id,  promotion_type, dollar_discount, 
+-- cast (percent_discount as double), qualifying_products, units_required, free_product_ids, length, 
+-- cast (valid_from as DATE),
+-- cast (valid_to as DATE)
+-- from bronze_db_retail.promotions;
+-- select * from silver_db_retail.promotions;
 
 -- COMMAND ----------
 
 --select expl as cs from(
 --select * from bronze_db_retail.suppliers;
 --select * from bronze_db_retail.purchase_orders;-- where EAN13=2198122550193;
-DESCRIBE EXTENDED bronze_db_retail.purchase_orders;
+--DESCRIBE EXTENDED silver_db_retail.sales_orders;
+DESCRIBE EXTENDED silver_db_retail.sales_orders;
 
 -- COMMAND ----------
 

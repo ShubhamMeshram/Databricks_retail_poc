@@ -130,7 +130,7 @@ describe database bronze_db_retail;
 --   SELECT * FROM products;
   
   
---5 (where schema cannot be infered, create view and then a table from view)
+--6 (where schema cannot be infered, create view and then a table from view)
 -- drop table if exists bronze_db_retail.promotions;
 -- drop view if exists promotions;
 -- CREATE OR REPLACE TEMP VIEW promotions
@@ -144,24 +144,24 @@ describe database bronze_db_retail;
 -- CREATE TABLE bronze_db_retail.promotions AS
 --   SELECT * FROM promotions;
 
---6
+--7
 -- drop table if exists bronze_db_retail.purchase_orders;
 -- CREATE TABLE bronze_db_retail.purchase_orders
 -- USING xml
 -- OPTIONS (path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/purchase_orders/purchase_orders.xml", rowTag "purchase_item", inferSchema "true")
 
---7
+--8
 -- drop table if exists bronze_db_retail.sales_orders;
 -- CREATE TABLE bronze_db_retail.sales_orders as
 -- select * from json.`dbfs:/databricks-datasets/retail-org/sales_orders/`;
 
 
---8
+--9
 -- drop table if exists bronze_db_retail.sales_stream;
 -- CREATE TABLE bronze_db_retail.sales_stream as
 -- select * from json.`dbfs:/databricks-datasets/retail-org/sales_stream/sales_stream.json`;
 
---9
+--10
 -- drop table if exists bronze_db_retail.suppliers;
 -- drop view if exists suppliers;
 -- CREATE OR REPLACE TEMP VIEW suppliers
