@@ -68,8 +68,61 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN> ${da.paths.datasets}/raw/events-kafka/
+CREATE DATABASE IF NOT EXISTS bronze_db_retail;
+CREATE DATABASE IF NOT EXISTS silver_db_retail;
+CREATE DATABASE IF NOT EXISTS gold_db_retail;
+
+-- COMMAND ----------
+
+--show databases;
+describe database bronze_db_retail;
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC #display(dbutils.fs.ls("/databricks-datasets/retail-org/active_promotions/"))
+-- MAGIC #display(dbutils.fs.ls("${da.paths.datasets}"))
+-- MAGIC 
+-- MAGIC 
+-- MAGIC dataset_path = "dbfs:/databricks-datasets/retail-org/customers"
+-- MAGIC print(dataset_path)
+-- MAGIC 
+-- MAGIC files = dbutils.fs.ls(dataset_path)
+-- MAGIC display(files)
+-- MAGIC print(type(files[1]))
+-- MAGIC print(files[1][1])
+
+-- COMMAND ----------
+
+
+
+-- COMMAND ----------
+
+--all bronze schema table creation statements are defined here:
+--1
+CREATE OR REPLACE TABLE bronze_db_retail.active_promotions AS SELECT * FROM parquet.`dbfs:/databricks-datasets/retail-org/active_promotions/active_promotions.parquet`;
+
+--2
+--drop table bronze_db_retail.company_employees;
+-- CREATE table bronze_db_retail.company_employees
+--   (employee_id LONG, employee_name STRING, department string, region string, employee_key LONG, active_record INT, active_record_start DATE,active_record_end DATE )
+-- USING CSV
+-- OPTIONS (
+--   header = "true")
+-- LOCATION "dbfs:/databricks-datasets/retail-org/company_employees/company_employees.csv"
+
+--3
+CREATE table bronze_db_retail.company_employees
+  (employee_id LONG, employee_name STRING, department string, region string, employee_key LONG, active_record INT, active_record_start DATE,active_record_end DATE )
+USING CSV
+OPTIONS (
+  header = "true")
+LOCATION "dbfs:/databricks-datasets/retail-org/customers/customers.csv"
+
+-- COMMAND ----------
+
+--select * from bronze_db_retail.company_employees;
+DESCRIBE EXTENDED bronze_db_retail.active_promotions;
 
 -- COMMAND ----------
 
