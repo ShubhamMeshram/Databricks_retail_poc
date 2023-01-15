@@ -51,6 +51,10 @@
 
 -- COMMAND ----------
 
+SELECT key,string(key), value,string(value) FROM    events_raw;
+
+-- COMMAND ----------
+
 CREATE OR REPLACE TEMP VIEW events_strings AS
   SELECT string(key), string(value) 
   FROM events_raw;
@@ -160,7 +164,7 @@ WHERE ecommerce.purchase_revenue_in_usd IS NOT NULL
 
 -- COMMAND ----------
 
-SELECT user_id, event_timestamp, event_name, explode(items) AS item 
+SELECT user_id, event_timestamp, event_name,items, explode(items) AS item 
 FROM events
 
 -- COMMAND ----------
