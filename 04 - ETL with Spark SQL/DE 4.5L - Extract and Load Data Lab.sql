@@ -84,13 +84,15 @@ describe database bronze_db_retail;
 -- MAGIC #display(dbutils.fs.ls("${da.paths.datasets}"))
 -- MAGIC 
 -- MAGIC 
--- MAGIC dataset_path = "dbfs:/databricks-datasets/retail-org/customers"
+-- MAGIC dataset_path = "dbfs:/databricks-datasets/retail-org/purchase_orders"
 -- MAGIC print(dataset_path)
 -- MAGIC 
 -- MAGIC files = dbutils.fs.ls(dataset_path)
 -- MAGIC display(files)
--- MAGIC print(type(files[1]))
--- MAGIC print(files[1][1])
+-- MAGIC #print(type(files[1]))
+-- MAGIC #print(files[1][1])
+-- MAGIC #files.select("path").show()
+-- MAGIC #print((files[1]))
 
 -- COMMAND ----------
 
@@ -98,31 +100,103 @@ describe database bronze_db_retail;
 
 -- COMMAND ----------
 
---all bronze schema table creation statements are defined here:
+--all bronze schema table creation statements are defined here: PART 1
 --1
-CREATE OR REPLACE TABLE bronze_db_retail.active_promotions AS SELECT * FROM parquet.`dbfs:/databricks-datasets/retail-org/active_promotions/active_promotions.parquet`;
+-- CREATE OR REPLACE TABLE bronze_db_retail.active_promotions AS SELECT * FROM parquet.`dbfs:/databricks-datasets/retail-org/active_promotions/active_promotions.parquet`;
 
 --2
---drop table bronze_db_retail.company_employees;
--- CREATE table bronze_db_retail.company_employees
---   (employee_id LONG, employee_name STRING, department string, region string, employee_key LONG, active_record INT, active_record_start DATE,active_record_end DATE )
+-- drop table if exists bronze_db_retail.company_employees;
+-- drop view if exists company_employees;
+-- CREATE OR REPLACE TEMP VIEW company_employees
+-- USING CSV
+-- OPTIONS (
+--   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/company_employees/company_employees.csv",
+--   header  "true");
+-- --LOCATION 
+-- CREATE TABLE bronze_db_retail.company_employees AS
+--   SELECT * FROM company_employees;
+
+--3
+-- drop table bronze_db_retail.customers;
+-- CREATE table bronze_db_retail.customers
 -- USING CSV
 -- OPTIONS (
 --   header = "true")
--- LOCATION "dbfs:/databricks-datasets/retail-org/company_employees/company_employees.csv"
+-- LOCATION "dbfs:/databricks-datasets/retail-org/customers/customers.csv"
 
---3
-CREATE table bronze_db_retail.company_employees
-  (employee_id LONG, employee_name STRING, department string, region string, employee_key LONG, active_record INT, active_record_start DATE,active_record_end DATE )
-USING CSV
-OPTIONS (
-  header = "true")
-LOCATION "dbfs:/databricks-datasets/retail-org/customers/customers.csv"
+
+--4 (where schema cannot be infered, create view and then a table from view)
+-- drop table if exists bronze_db_retail.loyalty_segments;
+-- drop view if exists loyalty_segments;
+-- CREATE OR REPLACE TEMP VIEW loyalty_segments
+-- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
+-- USING CSV
+-- OPTIONS (
+--   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/loyalty_segments/loyalty_segment.csv",
+--   header "true"
+--   );
+-- CREATE TABLE bronze_db_retail.loyalty_segments AS
+--   SELECT * FROM loyalty_segments;
 
 -- COMMAND ----------
 
---select * from bronze_db_retail.company_employees;
-DESCRIBE EXTENDED bronze_db_retail.active_promotions;
+--all bronze schema table creation statements are defined here: PART 2
+
+--5 (where schema cannot be infered, create view and then a table from view)
+-- drop table if exists bronze_db_retail.products;
+-- drop view if exists products;
+-- CREATE OR REPLACE TEMP VIEW products
+-- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
+-- USING CSV
+-- OPTIONS (
+--   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/products/products.csv",
+--   header "true",
+--   delimiter ";"
+--   );
+-- CREATE TABLE bronze_db_retail.products AS
+--   SELECT * FROM products;
+  
+  
+--5 (where schema cannot be infered, create view and then a table from view)
+-- drop table if exists bronze_db_retail.promotions;
+-- drop view if exists promotions;
+-- CREATE OR REPLACE TEMP VIEW promotions
+-- --(loyalty_segment_id string, loyalty_segment_description string, unit_threshold string, valid_from string, valid_to string )
+-- USING CSV
+-- OPTIONS (
+--   path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/promotions/promotions.csv",
+--   header "true"
+--   --delimiter ";"
+--   );
+-- CREATE TABLE bronze_db_retail.promotions AS
+--   SELECT * FROM promotions;
+
+--6
+CREATE TABLE bronze_db_retail.purchase_orders
+USING xml
+OPTIONS (path "dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/purchase_orders/purchase_orders.xml", rowTag "orders")
+
+-- COMMAND ----------
+
+select * from bronze_db_retail.promotions;
+--select * from loyalty_segments;
+--DESCRIBE EXTENDED bronze_db_retail.company_employees;
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC # dbutils.fs.head("dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/loyalty_segments/loyalty_segment.csv")
+-- MAGIC p="/dbfs/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/loyalty_segments/loyalty_segment.csv"
+-- MAGIC # f = open(p, "r")
+-- MAGIC # print(f)
+-- MAGIC 
+-- MAGIC # with  open(p, "r") as f_read:
+-- MAGIC #   for line in f_read:
+-- MAGIC #     print(line)
+-- MAGIC spark_p="dbfs:/mnt/dbacademy-datasets/data-engineering-with-databricks/v02/retail-org/purchase_orders/purchase_orders.xml"
+-- MAGIC df = spark.read.option("header","true").option("delimiter",";").csv(spark_p)
+-- MAGIC display(df)
+-- MAGIC print(df.dtypes)
 
 -- COMMAND ----------
 
