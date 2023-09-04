@@ -1,0 +1,60 @@
+azure_auth:
+  tenent_id: XXXXXXXXXXXXXXX
+azure_storage:
+  table1: adls_external_path1_dev
+  table2: adls_external_path2
+secrets_mgt:
+  key_vault_name: XXXXXXXXXXXXXXXXXXXXXXX
+  table1: secret_name1
+  table2: secret_name2
+dq_checks:
+  bronze:
+    silver_daily_salesevent:
+      variables:
+        var1: val1
+        var2: val2
+      grain:
+        - JournalReport_SaleEvent_TransactionID
+        - JournalReport_SaleEvent_EventStartDate
+        - TransmissionHeader_StoreLocationID
+      fixed_qc_checks:
+        - null_check
+        - dup_check
+      custom_qc_checks:
+        - sql
+
+  silver:
+    silver_daily_salesevent:
+      grain:
+        - JournalReport_SaleEvent_TransactionID
+        - JournalReport_SaleEvent_EventStartDate
+        - TransmissionHeader_StoreLocationID
+      fixed_qc_checks:
+        - null_check
+        - dup_check
+      custom_qc_checks:
+        - custom
+
+  gold:
+    silver_daily_salesevent:
+      grain:
+        - JournalReport_SaleEvent_TransactionID
+        - JournalReport_SaleEvent_EventStartDate
+        - TransmissionHeader_StoreLocationID
+      fixed_qc_checks:
+        - null_check
+        - dup_check
+      custom_qc_checks:
+        - custom
+
+  intermediate:
+    silver_daily_salesevent:
+      grain:
+        - JournalReport_SaleEvent_TransactionID
+        - JournalReport_SaleEvent_EventStartDate
+        - TransmissionHeader_StoreLocationID
+      fixed_qc_checks:
+        - null_check
+        - dup_check
+      custom_qc_checks:
+        - custom
